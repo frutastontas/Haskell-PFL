@@ -4,3 +4,7 @@ divisors n = [d | d <- [1..n], n `mod` d == 0]
 
 isPrime :: Integer-> Bool
 isPrime n = divisors n == [1,n]
+
+divs (x:xs) n | n == x
+
+

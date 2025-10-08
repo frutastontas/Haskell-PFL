@@ -11,7 +11,7 @@ myreplicate 0 a = []
 myreplicate x a = [a] ++ myreplicate (x-1) a
 
 myindex :: [a]-> Int-> a 
-myindex [x] 0 = x
+myindex (x:_) 0 = x
 myindex (x:xs) n = myindex xs (n-1)
 
 myelem :: Eq a => a-> [a]-> Bool

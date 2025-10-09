@@ -15,11 +15,20 @@ fitLine width xs = loop xs 0 []
           = (reverse acc, w:ws)
 
 
-fillWords :: Int-> [AWord]-> Paragraph
+fillWords :: Int -> [AWord] -> Paragraph
 fillWords _ [] = []
-fillWords w words = line : fillWords w remain
-                where (line, remain) = fitLine w words
+fillWords w ws =
+  let (line, remain) = fitLine w ws
+  in if null line
+     then []                     
+     else line : fillWords w remain
 
 
 
+main :: IO ()
+main = do  
+    input <- getContents
+    let output = unlines (map unwords (fillWords 70 (words input)))
+    putStr output
+    
 

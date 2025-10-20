@@ -41,3 +41,9 @@ fromList xs = build (sort xs)
          k = length xs `div` 2
          xs' = take k xs
          x:xs''= drop k xs
+
+
+nivel :: Int -> Arv a -> [a]
+nivel _ Vazia = []
+nivel 0 (No no _ _) = [no]
+nivel level (No no left right) = nivel (level-1) left ++ nivel (level-1) right

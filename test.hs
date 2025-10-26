@@ -15,6 +15,32 @@ valida ( l1, digi, l2) = validaLetras(l1) && validaDigitos(digi) && validaLetras
 
 
 
+incLetras :: Letras -> (Letras, Bool)
+incLetras (l1,l2)
+    | l2 < 'Z' = ((l1,chr(ord l2+1)), False)
+    | l1 < 'Z' = ((chr(ord l1 +1),'A'), False)
+    | otherwise = (('A','A'),True)
+
+
+incDigitos :: Digitos -> (Digitos, Bool)
+incDigitos (d1,d2) 
+    | d2 < 9 = ((d1,d2+1),False)
+    | d1 < 9 = ((d1+1,0),False)
+    | otherwise = ((0,0),True)
+
+
+incrMatricula :: Matricula -> Matricula
+incrMatricula (ll, dd, rl)
+    | carry_1 == False = (ll,dd,rl_new)
+    | carry_2 ==False  = (ll, dd_new, rl_new)
+    | otherwise = (ll_new, dd_new, rl_new)
+    where 
+        (rl_new, carry_1) = incLetras rl
+        (dd_new, carry_2) = incDigitos dd
+        (ll_new, carry_3) = incLetras ll
+
+
+
 
 data Arv a = Vazia | No a (Arv a) (Arv a)
     deriving (Eq)
@@ -41,7 +67,24 @@ remover x (No y left right)
 
 
 
-zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
-zipWith _ _ [] = []
-zipWith _ [] _ = []
-zipWith f (x:xs) (y:ys) = (f x y) : zipWith f xs ys
+palavras :: String -> [String]
+palavras [] = []
+palavras str = case dropWhile (==' ') str of
+                    [] -> []
+                    str' -> takeWhile (/=' ') str' : palavras (dropWhile (/=' ') str')
+
+
+algarismos :: Int -> [Int]
+algarismos 0 = []
+algarismos x = (x `mod` 10) : algarismos (x `div` 10)
+
+
+
+
+maxIndex :: Ord a => [a] -> (a, Int)
+maxIndex (x:xs) = loop xs (x,0) 1
+    where
+        loop [] res _ = res
+        loop (y:ys) (max_x,idx) cur_idx
+            | y >= max_x = loop ys (y,cur_idx) (cur_idx+1)
+            | otherwise = loop ys (max_x,idx) (cur_idx+1)

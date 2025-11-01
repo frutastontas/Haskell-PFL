@@ -88,3 +88,43 @@ maxIndex (x:xs) = loop xs (x,0) 1
         loop (y:ys) (max_x,idx) cur_idx
             | y >= max_x = loop ys (y,cur_idx) (cur_idx+1)
             | otherwise = loop ys (max_x,idx) (cur_idx+1)
+
+
+fromBits :: [Int] -> Int
+fromBits list = loop (reverse list) 0 1
+    where 
+        loop [] res _ = res
+        loop (x:xs) res mul = loop xs (res + mul*x) (mul*2)
+
+
+scalarProduct :: Num a => [a]-> [a]-> a
+scalarProduct xs ys = sum [x*y| (x,y)<-zip xs ys ]
+
+infL :: Integral a => [a]
+infL = 1 : [2*prev + i -1 | (i,prev) <- zip [2..] infL]
+
+differentFromNext :: String -> String
+differentFromNext s = [x | (x,y) <- zip s (tail s), x /= y]
+
+dropN :: [a] -> Int -> [a]
+dropN xs n = [val | (i,val)<- zip [1..] xs, i/=n]
+
+repeatNTimes :: Int -> String -> String
+repeatNTimes n s = [i | i <- s, j <- [1..n] ]
+
+deleteOne :: Eq a => a -> [a] -> [a]
+deleteOne _ [] = []
+deleteOne v (x:xs) |  v == x = xs
+                   | otherwise = x : deleteOne v xs
+
+mycycle :: [a] -> [a]
+mycycle [] = []
+mycycle (x:xs) = x : mycycle (xs ++ [x])
+
+
+myNub :: Eq a => [a]-> [a]
+myNub list = loop list []
+    where 
+        loop [] acc = reverse acc
+        loop (x:xs) acc | elem x acc = loop xs acc
+                        | otherwise = loop xs (x:acc)

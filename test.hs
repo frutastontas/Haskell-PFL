@@ -1,4 +1,5 @@
 import Data.Char
+import Data.IntMap (update)
 
 type Letras = (Char,Char)          -- um bloco de letras
 type Digitos = (Int,Int)           -- um bloco de algarismos
@@ -89,6 +90,22 @@ maxIndex (x:xs) = loop xs (x,0) 1
             | y >= max_x = loop ys (y,cur_idx) (cur_idx+1)
             | otherwise = loop ys (max_x,idx) (cur_idx+1)
 
+updateVotos :: [Int] -> Int -> Int -> [Int]
+updateVotos [] _ _ = []
+updateVotos (x:xs) cur_idx idx | cur_idx == idx = (x+1) : xs
+                               | otherwise = x : updateVotos xs (cur_idx+1) idx
+
+hondtAux :: Int -> [Int] -> [Int]-> [Int]
+hondtAux 0 xs _ = xs
+hondtAux n xs votos = let (val,idx) = maxIndex quocientes in
+                        hondtAux (n-1) (updateVotos xs 0 idx) votos
+                    where quocientes = zipWith (\v x -> v `div` (1+x) ) votos xs
+
+
+hondt :: Int -> [Int] -> [Int]
+hondt n votos = hondtAux n (replicate (length votos) 0) votos
+
+
 
 fromBits :: [Int] -> Int
 fromBits list = loop (reverse list) 0 1
@@ -128,3 +145,29 @@ myNub list = loop list []
         loop [] acc = reverse acc
         loop (x:xs) acc | elem x acc = loop xs acc
                         | otherwise = loop xs (x:acc)
+
+
+
+paragraphs :: String -> [String]
+paragraphs str = loop str [] [] 0 
+    where
+        loop [] [] cur_s _ = [cur_s] 
+        loop [] res [] _ = reverse res
+        loop [] res cur_s _ = reverse (reverse cur_s : res)
+        loop (s:sr) res cur_s flag 
+            | s == '\n' = if flag == 1 then loop sr (reverse cur_s : res) [] 0 else loop sr res cur_s 1
+            | otherwise = if flag == 1 then loop sr res (s:'\n':cur_s) 0 else loop sr res (s:cur_s) 0
+
+
+
+
+myInits :: String -> [String]
+myInits [] = [[]]
+myInits (x:xs) = [] : map (x:) (myInits xs)
+
+myTranspose :: Eq a => [[a]] -> [[a]]
+myTranspose [] = []
+myTranspose xss | saferows /= [] = map (head) saferows : myTranspose headless
+                | otherwise = []
+                where saferows = filter (not.null) xss
+                      headless = map tail saferows

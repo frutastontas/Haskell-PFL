@@ -43,7 +43,15 @@ fromList xs = build (sort xs)
          x:xs''= drop k xs
 
 
-nivel :: Int -> Arv a -> [a]
-nivel _ Vazia = []
-nivel 0 (No no _ _) = [no]
-nivel level (No no left right) = nivel (level-1) left ++ nivel (level-1) right
+size :: Set a-> Int
+size Empty = 0
+size (Node _ left right)= 1 + size left + size right
+
+height :: Set a-> Int
+height Empty = 0
+height (Node _ left right) = 1 + max (height left) (height right)
+
+
+listarDecr :: Set a -> [a]
+listarDecr Empty = []
+listarDecr (Node x left right) = listarDecr right ++ [x] ++ listarDecr left

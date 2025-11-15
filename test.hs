@@ -70,10 +70,8 @@ remover x (No y left right)
 
 palavras :: String -> [String]
 palavras [] = []
-palavras str = case dropWhile (==' ') str of
-                    [] -> []
-                    str' -> takeWhile (/=' ') str' : palavras (dropWhile (/=' ') str')
-
+palavras str =  takeWhile (/=' ') str' : palavras (dropWhile (/=' ') str')
+                where str' = dropWhile (==' ') str
 
 algarismos :: Int -> [Int]
 algarismos 0 = []

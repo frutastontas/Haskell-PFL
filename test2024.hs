@@ -68,6 +68,8 @@ numMatchDaysWithDraws league = foldr (\mday acc -> if (matchDayWithDraw mday) th
 bigWins :: League -> [(Int,[String])]
 bigWins league = [(index,[ winner ((t1,t2),(g1,g2)) | ((t1,t2),(g1,g2)) <- mday, abs(g1-g2) >= 3 ]) | (mday, index)<- zip league [1..]]
 
+
+
 type City = String
 type Path = [City]
 type Distance = Int
@@ -86,6 +88,14 @@ adjacent ((src,dest,dist):xs) city | city == src = (dest,dist) : adjacent xs cit
                                    | otherwise = adjacent xs city
 
 
+areConnected :: RoadMap -> City -> City -> Bool
+areConnected roadmap start end = dfs roadmap start [start]  -- last argument is the visited list of nodes
+    where 
+        dfs _ current _ | current == end = True
+        dfs rmap current visited = or [dfs roadmap no newVisited| no <- unvistedsNeigh]
+            where
+                unvistedsNeigh = filter (\cty -> not (elem cty visited) ) (map (fst) (adjacent roadmap current)) -- get all adjacent and only the not visited 
+                newVisited = visited ++ unvistedsNeigh
 
 
 data KdTree = Empty | Node Char (Int,Int) KdTree KdTree deriving (Eq,Show)
@@ -107,3 +117,26 @@ insertAux (x,y) tipo (Node t (xn,yn) left right)    | x==xn && y ==yn = (Node t 
 
                                                             'y' -> if (y>=yn) then Node t (xn,yn) left (insertAux (x,y) 'x' right) 
                                                             else Node t (xn,yn) (insertAux (x,y) 'x' left) right
+
+putTreeStr :: KdTree -> IO ()
+putTreeStr tree = putTreeStrAux tree ""
+
+
+putTreeStrAux :: KdTree -> String -> IO ()
+putTreeStrAux Empty prefix = return ()
+putTreeStrAux (Node t (xn,yn) left right) prefix =
+    do
+        putStrLn (prefix++"("++show xn ++","++show yn ++ ")")
+
+        let (tipo,val) = case t of
+                        'x'-> ('x',xn)
+                        'y'-> ('y',yn)
+        
+        putStrLn (prefix++[tipo] ++ "<"++show val)
+
+        putTreeStrAux left ("  "++prefix)
+
+        putStrLn (prefix++[tipo] ++ ">="++show val)
+
+        putTreeStrAux right ("  "++prefix)
+        

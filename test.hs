@@ -169,3 +169,48 @@ myTranspose xss | saferows /= [] = map (head) saferows : myTranspose headless
                 | otherwise = []
                 where saferows = filter (not.null) xss
                       headless = map tail saferows
+
+
+
+data BST a = Empty
+ | Node (BST a) a (BST a)
+ deriving (Show,Eq)
+
+
+contains :: Eq a => a-> BST a -> Bool
+contains _ Empty = False
+contains key (Node left nkey right) = key == nkey || contains key left || contains key right
+
+
+smallest :: BST a -> Maybe a
+smallest Empty = Nothing
+smallest (Node Empty val _) = Just val          -- this means we cant go left anymore so the current node is the smallest
+smallest (Node left val _) = smallest left      -- continue going left to find the smallest
+
+
+insert :: Ord a => a -> BST a -> BST a 
+insert key Empty = Node Empty key Empty
+insert key (Node left nkey right) | key == nkey = Node left nkey right
+                                  | key > nkey = Node left nkey (insert key right)
+                                  | key < nkey = Node (insert key left) nkey right
+
+
+
+deleteSmallest :: BST a -> (Maybe a, BST a)
+deleteSmallest Empty = (Nothing,Empty)
+deleteSmallest (Node Empty key _) =  (Just key, Empty)
+deleteSmallest (Node left key right) = (s, Node left_ key right)
+                                    where
+                                        (s,left_) = deleteSmallest left
+
+
+
+bst2List :: BST a-> [a]
+bst2List Empty = []
+bst2List (Node left key right) = bst2List left ++ [key] ++ bst2List right
+
+
+isOrdered :: (Ord a) => BST a-> Bool
+isOrdered tree = all (\(x,y)->x<y) (zip lista (tail lista)) 
+                where
+                    lista = bst2List tree

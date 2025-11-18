@@ -14,13 +14,13 @@ import Data.Char
 --
 -- a data type for expressions
 -- made up from integer numbers, + and *
---
+
 type Name = String
-
-data Command = Assign Name Expr
-              | Eval Expr
-
 type Env = [(Name, Integer)]
+
+data Command = Eval Expr
+              | Assign Name Expr
+
 
 data Expr = Num Integer
           | Add Expr Expr
@@ -41,9 +41,8 @@ eval env (Sub e1 e2) = eval env e1 - eval env e2
 eval env (Div e1 e2) = eval env e1 `div` eval env e2
 eval env (Mod e1 e2) = eval env e1 `mod` eval env e2
 eval env (Var name) = case lookup name env of
-                            Just val -> val
-                            Nothing -> 0
-
+                          Just val -> val
+                          Nothing -> 0
 -- | a parser for expressions
 -- Grammar rules:
 --
@@ -56,13 +55,14 @@ eval env (Var name) = case lookup name env of
 -- factor ::= natural | '(' expr ')'
 
 command :: Parser Command
-command = do 
+command = 
+          do 
             v <- variable
             char '='
             e <- expr
             return (Assign v e)
           <|>
-            do
+            do 
               e <- expr
               return (Eval e)
 
@@ -74,7 +74,7 @@ exprCont :: Expr -> Parser Expr
 exprCont acc = do char '+'
                   t <- term
                   exprCont (Add acc t)
-               <|>
+               <|> 
                   do
                     char '-'
                     t <- term
@@ -90,12 +90,12 @@ termCont acc =  do char '*'
                    f <- factor  
                    termCont (Mul acc f)
                  <|>
-                    do 
+                    do
                       char '/'
                       f <- factor
                       termCont (Div acc f)
                  <|>
-                    do 
+                    do
                       char '%'
                       f <- factor
                       termCont (Mod acc f)
@@ -105,7 +105,7 @@ factor :: Parser Expr
 factor = do n <- natural
             return (Num n)
           <|>
-            do
+            do 
               v <- variable
               return (Var v)
           <|>
@@ -121,13 +121,13 @@ natural = do xs <- many1 (satisfy isDigit)
 
 variable :: Parser Name
 variable = do 
-            xs <- many1 (satisfy isLetter)
-            return xs
+             xs <- many1 (satisfy isLetter)
+             return xs
 
-----------------------------------------------------------------     
+----------------------------------------------------------------       
 
 update :: Env -> Name -> Integer -> Env
-update env name value = (name,value) : filter (\(n1,v1) -> n1 /= name) env
+update env name value = (name, value) : filter (\(n,_)-> n /= name) env
   
 main :: IO ()
 main
@@ -138,21 +138,19 @@ main
 calculator :: Env -> [String] -> IO ()
 calculator env []  = return ()
 calculator env (l:ls) = do 
-                       let (output,newEnv) = execute env l
-                       putStrLn output
-                       calculator newEnv ls  
+                        let (output,newEnv) = execute env l
+                        putStrLn output
+                        calculator newEnv ls  
 
 
-
-execute :: Env-> String ->(String, Env)
+execute :: Env->String->(String, Env)
 execute env txt
   = case parse command txt of
-      [ (cmd, "") ] ->  case cmd of
-                          Assign v e -> (show resultado,newEnv)
-                                        where
-                                          resultado = eval env e
-                                          newEnv = update env v resultado 
-                          Eval e -> (show resultado,env)
-                                    where
-                                      resultado = eval env e
-      _ -> ("parse error; try again",env) 
+      [ (Assign v e, "") ] ->  (show resultado, newEnv)
+                              where
+                                resultado = eval env e
+                                newEnv = update env v resultado
+      [ (Eval  e, "") ] ->  (show resultado, env)
+                              where
+                                resultado = eval env e
+      _ -> ("parse error; try again" , env )

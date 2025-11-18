@@ -196,12 +196,7 @@ insert key (Node left nkey right) | key == nkey = Node left nkey right
 
 
 
-deleteSmallest :: BST a -> (Maybe a, BST a)
-deleteSmallest Empty = (Nothing,Empty)
-deleteSmallest (Node Empty key _) =  (Just key, Empty)
-deleteSmallest (Node left key right) = (s, Node left_ key right)
-                                    where
-                                        (s,left_) = deleteSmallest left
+
 
 
 
@@ -214,3 +209,53 @@ isOrdered :: (Ord a) => BST a-> Bool
 isOrdered tree = all (\(x,y)->x<y) (zip lista (tail lista)) 
                 where
                     lista = bst2List tree
+
+
+data AVLTree a = Empty
+ | Node (AVLTree a) a (AVLTree a)
+ deriving (Show,Eq)
+
+height :: (Num b, Ord b) => AVLTree a-> b
+height Empty = 0
+height (Node t1 _ t2) = 1 + max (height t1) (height t2)
+
+
+isBalanced :: AVLTree a -> Bool
+isBalanced Empty = True
+isBalanced (Node Empty _ right) = height right < 2
+isBalanced (Node left _ Empty) = height left < 2
+isBalanced (Node left key right) = (abs(height left - height right) < 2) && isBalanced left && isBalanced right
+
+
+
+
+fuseDigits :: [Int] -> Int
+fuseDigits xs = foldl (\acc x -> acc*10 + x) 0 xs
+
+
+singleElement :: Int -> Bool
+singleElement n = (length (show n)) == 1
+
+separateSingleDigits :: [Int] -> ([Int],[Int])
+separateSingleDigits xs = foldl (\(x1,x2) x -> if (singleElement x) then (x1 ++ [x],x2) else (x1, x2 ++ [x])) ([],[]) xs
+
+myPi :: Int -> Double
+myPi n = sqrt(12*(sum (take n [ x/y | (x,y)<- zip (cycle [1,-1]) (map (^2) [1..])])))
+
+
+qSort :: [Int] -> [Int]
+qSort [] = []
+qSort (x:xs) = qSort smaller ++ [x] ++ qSort bigger
+                where
+                    smaller = filter (<x) xs
+                    bigger = filter (>x) xs
+
+
+myGroup :: Eq a => [a] -> [[a]]
+myGroup [] = []
+myGroup xs = loop xs [] []
+    where
+        loop [] cur_group res = reverse (cur_group : res)
+        loop (x:xs) [] res = loop xs [x] res
+        loop (x:xs) cur_group res | elem x cur_group = loop xs (x:cur_group) res
+                                  | otherwise = loop (x:xs) [] (cur_group : res)
